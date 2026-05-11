@@ -153,7 +153,7 @@ export function EmployeeManagement({ userRole = "Admin" }: { userRole?: string }
     return matchesSearch && matchesDepartment && matchesStatus
   })
 
-  const departments = [...new Set(employees.map((emp) => emp.department))]
+  const departments = [...new Set(employees.map((emp) => emp.department).filter((d): d is string => !!d))]
 
   return (
     <div className="space-y-6">
@@ -1590,19 +1590,19 @@ function EmployeeForm({
                 nationalId: formData.nationalId,
                 nationalIdExpiry: formData.nationalIdExpiry,
                 socialInsuranceNumber: formData.socialInsuranceNumber,
-                gender: formData.gender,
-                militaryStatus: formData.militaryStatus,
+                gender: formData.gender as "Male" | "Female",
+                militaryStatus: formData.militaryStatus as "Completed" | "Exempted" | "Postponed" | "Not Applicable" | undefined || undefined,
                 militaryCertificateExpiry: formData.gender === "Male" ? formData.militaryCertificateExpiry : undefined,
                 religion: formData.religion,
-                maritalStatus: formData.maritalStatus,
+                maritalStatus: formData.maritalStatus as "Single" | "Married" | "Divorced" | "Widowed",
                 dateOfBirth: formData.dateOfBirth,
                 workLocation: formData.workLocation,
-                contractType: formData.contractType,
-                employmentType: formData.employmentType,
+                contractType: formData.contractType as "Full-time" | "Part-time" | "Consultant",
+                employmentType: formData.employmentType as "Insource" | "Outsource",
                 outsourceCompany: formData.outsourceCompany,
                 costCenter: formData.costCenter,
-                socialInsuranceStatus: formData.socialInsuranceStatus,
-                employeeStatus: formData.employeeStatus,
+                socialInsuranceStatus: formData.socialInsuranceStatus as "Insured" | "Business Owner" | "Not Insured",
+                employeeStatus: formData.employeeStatus as "On-board" | "Resigned",
                 exitDate: formData.exitDate,
                 division: formData.division,
                 department: formData.department || undefined,
@@ -1646,20 +1646,21 @@ function EmployeeForm({
         nationalId: formData.nationalId,
         nationalIdExpiry: formData.nationalIdExpiry,
         socialInsuranceNumber: formData.socialInsuranceNumber,
-        gender: formData.gender,
-        militaryStatus: formData.militaryStatus,
+        gender: formData.gender as "Male" | "Female",
+        militaryStatus: formData.militaryStatus as "Completed" | "Exempted" | "Postponed" | "Not Applicable" | undefined || undefined,
         militaryCertificateExpiry: formData.gender === "Male" ? formData.militaryCertificateExpiry : undefined,
         religion: formData.religion,
-        maritalStatus: formData.maritalStatus,
+        maritalStatus: formData.maritalStatus as "Single" | "Married" | "Divorced" | "Widowed",
         dateOfBirth: formData.dateOfBirth,
         workLocation: formData.workLocation,
-        contractType: formData.contractType,
-        employmentType: formData.employmentType,
+        contractType: formData.contractType as "Full-time" | "Part-time" | "Consultant",
+        employmentType: formData.employmentType as "Insource" | "Outsource",
         outsourceCompany: formData.outsourceCompany,
         costCenter: formData.costCenter,
-        socialInsuranceStatus: formData.socialInsuranceStatus,
-        employeeStatus: formData.employeeStatus,
+        socialInsuranceStatus: formData.socialInsuranceStatus as "Insured" | "Business Owner" | "Not Insured",
+        employeeStatus: formData.employeeStatus as "On-board" | "Resigned",
         exitDate: formData.exitDate,
+        division: formData.division,
         department: formData.department,
         position: formData.position,
         manager: formData.manager,
@@ -2033,7 +2034,7 @@ function EmployeeForm({
               <Label htmlFor="employeeStatus">Employee Status</Label>
               <Select
                 value={formData.employeeStatus}
-                onValueChange={(value) => setFormData({ ...formData, employeeStatus: value })}
+                onValueChange={(value) => setFormData({ ...formData, employeeStatus: value as "On-board" | "Resigned" })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select employee status" />
@@ -2438,19 +2439,19 @@ function EmployeeForm({
                   </div>
                 )}
               </div>
-
             </div>
           </div>
+          </TabsContent>
+        </Tabs>
 
-        </TabsContent>
-      </Tabs>
-
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onSubmit}>
-          Cancel
-        </Button>
-        <Button type="submit">{employee ? "Update Employee" : "Add Employee"}</Button>
-      </div>
-    </form>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="button" variant="outline" onClick={onSubmit}>
+            Cancel
+          </Button>
+          <Button type="submit" className="bg-primary text-white">
+            {employee ? "Update Employee" : "Add Employee"}
+          </Button>
+        </div>
+      </form>
   )
 }

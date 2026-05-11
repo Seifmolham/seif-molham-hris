@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { ExecutiveDashboard } from "@/components/executive-dashboard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -546,7 +547,7 @@ const ratingScales = [
 export function PerformanceManagement() {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null)
   const [selectedTab, setSelectedTab] = useState("overview")
-  const [activeSection, setActiveSection] = useState<"reviews" | "job-descriptions" | "appraisal-templates">("reviews")
+  const [activeSection, setActiveSection] = useState<"reviews" | "job-descriptions" | "appraisal-templates" | "executive-dashboard">("reviews")
 
   const [selectedJobTemplate, setSelectedJobTemplate] = useState<any>(null)
   const [jobDescriptions, setJobDescriptions] = useState<any[]>([])
@@ -983,12 +984,12 @@ export function PerformanceManagement() {
             )
           })}
           <polygon
-            points={points.map((p) => `${p.x + 40},${p.y + 40}`).join(" ")}
+            points={points.map((p: {x:number;y:number;labelX:number;labelY:number;label:string;category:string;score:number}) => `${p.x + 40},${p.y + 40}`).join(" ")}
             fill="rgba(0, 197, 179, 0.2)"
             stroke="#00C5B3"
             strokeWidth="2"
           />
-          {points.map((point, index) => (
+          {points.map((point: {x:number;y:number;labelX:number;labelY:number;label:string;category:string;score:number}, index: number) => (
             <g key={index}>
               <circle cx={point.x + 40} cy={point.y + 40} r="4" fill="#00C5B3" stroke="white" strokeWidth="2" />
               <text
@@ -1088,6 +1089,14 @@ export function PerformanceManagement() {
         >
           <ClipboardList className="h-4 w-4 mr-2" />
           Appraisal Templates
+        </Button>
+        <Button
+          variant={activeSection === "executive-dashboard" ? "default" : "ghost"}
+          className={activeSection === "executive-dashboard" ? "bg-primary" : ""}
+          onClick={() => setActiveSection("executive-dashboard")}
+        >
+          <BarChart3 className="h-4 w-4 mr-2" />
+          Executive Dashboard
         </Button>
       </div>
 
@@ -2314,6 +2323,7 @@ export function PerformanceManagement() {
           </Card>
         </>
       )}
+      {activeSection === "executive-dashboard" && <ExecutiveDashboard />}
     </div>
   )
 }

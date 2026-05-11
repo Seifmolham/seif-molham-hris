@@ -493,7 +493,7 @@ function DepartmentForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as "Active" | "Inactive" })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

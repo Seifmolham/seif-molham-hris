@@ -44,6 +44,14 @@ import {
   ToggleRight,
   Bell,
   X,
+  Search,
+  MapPin,
+  Laptop,
+  Fingerprint,
+  Smartphone,
+  CreditCard,
+  PenLine,
+  Timer,
 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
@@ -53,6 +61,38 @@ import { Textarea } from "@/components/ui/textarea"
 export function AnalyticsDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("monthly")
   const [selectedDepartment, setSelectedDepartment] = useState("all")
+
+  // ── Daily Attendance state ────────────────────────────────────────────────
+  const [attendanceSearch, setAttendanceSearch]   = useState("")
+  const [attendanceStatus, setAttendanceStatus]   = useState("all")
+  const [attendanceDept,   setAttendanceDept]     = useState("all")
+
+  const attendanceRecords = [
+    { id: 1, name: "Ahmed Hassan",   dept: "Engineering", checkIn: "08:52", checkOut: "17:45", hours: 8.88, overtime: 0.88, status: "Present",  location: "Office",  method: "Biometric" },
+    { id: 2, name: "Fatima Ali",     dept: "Marketing",   checkIn: "09:34", checkOut: "18:10", hours: 8.6,  overtime: 0.6,  status: "Late",     location: "Office",  method: "Mobile App" },
+    { id: 3, name: "Omar Mahmoud",   dept: "Sales",       checkIn: "—",     checkOut: "—",     hours: 0,    overtime: 0,    status: "Absent",   location: "—",       method: "—" },
+    { id: 4, name: "Mona Hassan",    dept: "HR",          checkIn: "08:59", checkOut: "17:30", hours: 8.5,  overtime: 0.5,  status: "Present",  location: "Remote",  method: "Mobile App" },
+    { id: 5, name: "Youssef Ahmed",  dept: "Finance",     checkIn: "09:00", checkOut: "—",     hours: 4.0,  overtime: 0,    status: "On Leave", location: "—",       method: "—" },
+    { id: 6, name: "Sara Khaled",    dept: "Engineering", checkIn: "08:45", checkOut: "17:50", hours: 9.08, overtime: 1.08, status: "Present",  location: "Office",  method: "Card" },
+    { id: 7, name: "Karim Nasser",   dept: "IT",          checkIn: "10:15", checkOut: "18:00", hours: 7.75, overtime: 0,    status: "Late",     location: "Office",  method: "Biometric" },
+    { id: 8, name: "Nadia Farouk",   dept: "Operations",  checkIn: "08:30", checkOut: "17:00", hours: 8.5,  overtime: 0.5,  status: "Present",  location: "Field",   method: "Mobile App" },
+  ]
+
+  const filteredAttendance = attendanceRecords.filter(r => {
+    const matchesSearch = r.name.toLowerCase().includes(attendanceSearch.toLowerCase()) || r.dept.toLowerCase().includes(attendanceSearch.toLowerCase())
+    const matchesStatus = attendanceStatus === "all" || r.status.toLowerCase().replace(" ", "-") === attendanceStatus
+    const matchesDept   = attendanceDept   === "all" || r.dept === attendanceDept
+    return matchesSearch && matchesStatus && matchesDept
+  })
+
+  const attendanceStats = {
+    present:  attendanceRecords.filter(r => r.status === "Present").length,
+    late:     attendanceRecords.filter(r => r.status === "Late").length,
+    absent:   attendanceRecords.filter(r => r.status === "Absent").length,
+    onLeave:  attendanceRecords.filter(r => r.status === "On Leave").length,
+    remote:   attendanceRecords.filter(r => r.location === "Remote").length,
+    total:    attendanceRecords.length,
+  }
 
   // ── Scheduled Reports ─────────────────────────────────────────────────────
   type ReportFormat = "PDF" | "Excel" | "CSV" | "Email Summary"
@@ -95,7 +135,7 @@ export function AnalyticsDashboard() {
     setForm({ ...emptyForm }); setShowForm(false)
   }
   const handleEdit = (r: ScheduledReport) => {
-    setForm({ name: r.name, type: r.type, format: r.format, recipients: r.recipients, frequency: r.frequency, dayOfWeek: r.dayOfWeek, dayOfMonth: r.dayOfMonth, time: r.time, enabled: r.enabled })
+    setForm({ name: r.name, type: r.type, format: r.format, recipients: r.recipients, frequency: r.frequency, dayOfWeek: r.dayOfWeek ?? "", dayOfMonth: r.dayOfMonth ?? "", time: r.time, enabled: r.enabled })
     setEditId(r.id); setShowForm(true)
   }
   const handleDelete = (id: number) => { setSchedules(s => s.filter(r => r.id !== id)); setDeleteConfirm(null) }
@@ -347,6 +387,171 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* ── Daily Attendance Schedule ───────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-900/30">
+                    <Clock className="w-5 h-5 text-teal-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Daily Attendance Schedule</CardTitle>
+                    <CardDescription>Today's attendance overview — live snapshot</CardDescription>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <Input
+                      placeholder="Search employee…"
+                      value={attendanceSearch}
+                      onChange={e => setAttendanceSearch(e.target.value)}
+                      className="pl-8 h-8 w-40 text-xs"
+                    />
+                  </div>
+                  {/* Status filter */}
+                  <Select value={attendanceStatus} onValueChange={setAttendanceStatus}>
+                    <SelectTrigger className="h-8 w-32 text-xs">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="present">Present</SelectItem>
+                      <SelectItem value="late">Late</SelectItem>
+                      <SelectItem value="absent">Absent</SelectItem>
+                      <SelectItem value="on-leave">On Leave</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {/* Department filter */}
+                  <Select value={attendanceDept} onValueChange={setAttendanceDept}>
+                    <SelectTrigger className="h-8 w-36 text-xs">
+                      <SelectValue placeholder="Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Depts</SelectItem>
+                      <SelectItem value="Engineering">Engineering</SelectItem>
+                      <SelectItem value="Marketing">Marketing</SelectItem>
+                      <SelectItem value="Sales">Sales</SelectItem>
+                      <SelectItem value="HR">HR</SelectItem>
+                      <SelectItem value="Finance">Finance</SelectItem>
+                      <SelectItem value="Operations">Operations</SelectItem>
+                      <SelectItem value="IT">IT</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Summary stat pills */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                {[
+                  { label: "Present",  count: attendanceStats.present,  color: "bg-green-100 text-green-700"  },
+                  { label: "Late",     count: attendanceStats.late,     color: "bg-amber-100 text-amber-700"  },
+                  { label: "Absent",   count: attendanceStats.absent,   color: "bg-red-100 text-red-700"      },
+                  { label: "On Leave", count: attendanceStats.onLeave,  color: "bg-blue-100 text-blue-700"    },
+                  { label: "Remote",   count: attendanceStats.remote,   color: "bg-purple-100 text-purple-700"},
+                ].map(s => (
+                  <span key={s.label} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${s.color}`}>
+                    {s.label} <span className="font-bold">{s.count}</span>
+                  </span>
+                ))}
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700 ml-auto">
+                  Attendance rate <span className="font-bold">{Math.round((attendanceStats.present + attendanceStats.late) / attendanceStats.total * 100)}%</span>
+                </span>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0">
+              <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-800">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-800/60 text-xs text-slate-500 uppercase tracking-wider">
+                      <th className="px-3 py-2.5 text-left font-semibold">Employee</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Department</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Check In</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Check Out</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Hours</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Method</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {filteredAttendance.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-3 py-8 text-center text-slate-400 text-sm">No records match your filters</td>
+                      </tr>
+                    ) : filteredAttendance.map(r => {
+                      const statusStyle: Record<string, string> = {
+                        Present:  "bg-green-100 text-green-700",
+                        Late:     "bg-amber-100 text-amber-700",
+                        Absent:   "bg-red-100 text-red-700",
+                        "On Leave": "bg-blue-100 text-blue-700",
+                      }
+                      const locationIcon = r.location === "Remote"
+                        ? <Laptop className="w-3.5 h-3.5 text-purple-500" />
+                        : r.location === "Field"
+                          ? <MapPin className="w-3.5 h-3.5 text-orange-500" />
+                          : r.location === "Office"
+                            ? <Building className="w-3.5 h-3.5 text-slate-400" />
+                            : null
+                      const methodIcon = r.method === "Biometric"
+                        ? <Fingerprint className="w-3.5 h-3.5 text-teal-500" />
+                        : r.method === "Mobile App"
+                          ? <Smartphone className="w-3.5 h-3.5 text-blue-500" />
+                          : r.method === "Card"
+                            ? <CreditCard className="w-3.5 h-3.5 text-indigo-500" />
+                            : r.method === "Manual"
+                              ? <PenLine className="w-3.5 h-3.5 text-slate-400" />
+                              : null
+                      return (
+                        <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                                style={{ background: "linear-gradient(135deg,#00C5B3,#007a70)" }}>
+                                {r.name.split(" ").map(n => n[0]).join("")}
+                              </div>
+                              <span className="font-medium text-slate-800 dark:text-slate-100">{r.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-slate-500 text-xs">{r.dept}</td>
+                          <td className="px-3 py-2.5 font-mono text-sm font-medium">{r.checkIn}</td>
+                          <td className="px-3 py-2.5 font-mono text-sm text-slate-500">{r.checkOut}</td>
+                          <td className="px-3 py-2.5">
+                            {r.hours > 0 ? (
+                              <div className="flex items-center gap-1.5">
+                                <Timer className="w-3.5 h-3.5 text-slate-400" />
+                                <span className="text-sm">{r.hours.toFixed(1)}h</span>
+                                {r.overtime > 0 && <span className="text-xs text-orange-500 font-medium">+{r.overtime.toFixed(1)}OT</span>}
+                              </div>
+                            ) : <span className="text-slate-300">—</span>}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              {locationIcon}
+                              {methodIcon}
+                              <span className="text-xs text-slate-500">{r.method !== "—" ? r.method : ""}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusStyle[r.status] ?? "bg-slate-100 text-slate-600"}`}>
+                              {r.status}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-slate-400 mt-2 text-right">
+                Showing {filteredAttendance.length} of {attendanceStats.total} employees
+              </p>
+            </CardContent>
+          </Card>
+
         </TabsContent>
 
         {/* ════════════════════════════════════════════════════════════════

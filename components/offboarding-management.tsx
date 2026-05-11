@@ -173,7 +173,7 @@ export function OffboardingManagement() {
     const errs: Partial<typeof emptyInitForm> = {}
     if (!initForm.employeeName.trim()) errs.employeeName = "Employee name is required"
     if (!initForm.lastDay) errs.lastDay = "Last day is required"
-    if (!initForm.reason) errs.reason = "Reason is required"
+    if (!initForm.reason) errs.reason = "" as typeof errs.reason
     if (!initForm.manager.trim()) errs.manager = "Manager is required"
     setInitErrors(errs)
     return Object.keys(errs).length === 0
